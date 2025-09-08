@@ -1,7 +1,7 @@
-﻿import fitz  # PyMuPDF
+import fitz  # PyMuPDF
 import os
+import math
 
-# Output directory
 output_dir = "pdf_images"
 os.makedirs(output_dir, exist_ok=True)
 
@@ -12,12 +12,16 @@ for pdf_file in [f for f in os.listdir('.') if f.lower().endswith('.pdf')]:
     pdf_output_dir = os.path.join(output_dir, base_name)
     os.makedirs(pdf_output_dir, exist_ok=True)
 
+    total_images = 0
+    for page_index in range(len(doc)):
+        total_images += len(doc[page_index].get_images(full=True))
+
+    digits = max(3, len(str(total_images)))
     counter = 1
     img_count = 0
 
     for page_index in range(len(doc)):
-        page = doc[page_index]
-        images = page.get_images(full=True)
+        images = doc[page_index].get_images(full=True)
 
         for img in images:
             xref = img[0]
@@ -25,7 +29,7 @@ for pdf_file in [f for f in os.listdir('.') if f.lower().endswith('.pdf')]:
             image_bytes = info["image"]
             image_ext = info["ext"]
 
-            image_filename = f"P{counter:03d}.{image_ext}"
+            image_filename = f"{counter:0{digits}d}.{image_ext}"
             image_path = os.path.join(pdf_output_dir, image_filename)
 
             with open(image_path, "wb") as f:
